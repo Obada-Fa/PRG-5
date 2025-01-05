@@ -170,7 +170,15 @@ class ShiftController extends Controller
      */
     public function destroy(Shift $shift)
     {
+        // Check if the logged-in user is the creator of the shift
+        if ($shift->created_by !== auth()->id()) {
+            abort(403, 'You do not have permission to delete this shift.');
+        }
+
+        // Proceed with deletion
         $shift->delete();
+
         return redirect()->route('shifts.index')->with('success', 'Shift deleted successfully.');
     }
+
 }
