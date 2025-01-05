@@ -17,23 +17,37 @@
             Search
         </button>
     </form>
+
     @if(auth()->check() && auth()->user()->isAdmin())
-    <a href="{{ route('shifts.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        Add New Shift
-    </a>
+        <a href="{{ route('shifts.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Add New Shift
+        </a>
     @endif
+
     <div class="grid gap-6">
         @foreach ($shifts as $shift)
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-xl text-gray-700 font-semibold">{{ $shift->title }}</h2>
                 <p class="text-gray-700">{{ $shift->description }}</p>
-                <p class="text-gray-700">{{ $shift->start->format('Y-M-d')}} - {{$shift->end->format('Y-M-d')}}</p>
-                <p class="text-gray-700">{{ $shift->start->format(' H:i')}} - {{$shift->end->format(' H:i')}}</p>
+                <p class="text-gray-700">{{ $shift->start->format('Y-M-d')}} - {{ $shift->end->format('Y-M-d') }}</p>
+                <p class="text-gray-700">{{ $shift->start->format(' H:i')}} - {{ $shift->end->format(' H:i') }}</p>
                 <p class="text-gray-500">Location: {{ $shift->location }}</p>
                 <p class="text-gray-500">Status: {{ $shift->status }}</p>
-@if(auth()->check() && auth()->user()->isAdmin())
-                    <div class="mt-4">
 
+                @if(auth()->check() && auth()->user()->role === 'user' && $shift->status === 'available')
+                    <!-- Apply Button -->
+                    <form action="{{ route('shifts.apply', $shift->id) }}" method="POST" class="mt-4">
+                        @csrf
+                        <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            Apply
+                        </button>
+                    </form>
+                @elseif(auth()->check() && auth()->user()->role === 'user' && $shift->status === 'reserved')
+                    <p class="mt-4 text-gray-500 font-bold">Shift Reserved</p>
+                @endif
+
+                @if(auth()->check() && auth()->user()->isAdmin())
+                    <div class="mt-4">
                         <a href="{{ route('shifts.edit', $shift->id) }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-4 rounded">Edit</a>
                         <form action="{{ route('shifts.destroy', $shift->id) }}" method="POST" class="inline-block">
                             @csrf
@@ -51,8 +65,7 @@
                             </button>
                         </form>
                     </div>
-@endif
-
+                @endif
             </div>
         @endforeach
     </div>

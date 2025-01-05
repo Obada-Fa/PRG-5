@@ -53,5 +53,11 @@ class User extends Authenticatable
         return $this->role === 'user';
     }
 
+    public function shifts()
+    {
+        return $this->belongsToMany(Shift::class, 'user_shift')
+            ->withPivot('status')
+            ->withTimestamps();
+    }
 
 }

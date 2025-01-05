@@ -17,6 +17,12 @@ class Shift extends Model
         'start' => 'datetime',
         'end' => 'datetime',
     ];
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_shift')
+            ->withPivot('status')
+            ->withTimestamps();
+    }
 
 
 }

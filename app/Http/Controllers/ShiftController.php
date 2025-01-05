@@ -61,26 +61,6 @@ class ShiftController extends Controller
         return back()->with('success', 'You have successfully applied for the shift.');
     }
 
-    public function apply(Request $request, $id)
-    {
-        $shift = Shift::findOrFail($id);
-
-        // Check if the shift is available
-        if ($shift->status !== 'available') {
-            return back()->with('error', 'This shift is no longer available.');
-        }
-
-        // Check if the user has already applied for this shift
-        $existingApplication = $shift->users()->where('user_id', auth()->id())->first();
-        if ($existingApplication) {
-            return back()->with('error', 'You have already applied for this shift.');
-        }
-
-        // Create a new application in the pivot table
-        $shift->users()->attach(auth()->id(), ['status' => 'pending']);
-
-        return back()->with('success', 'You have successfully applied for the shift.');
-    }
 
 
     /**
