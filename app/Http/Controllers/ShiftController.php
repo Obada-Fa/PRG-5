@@ -82,16 +82,26 @@ class ShiftController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'start' => 'required|date',
             'end' => 'required|date|after:start',
             'location' => 'required|string|max:255',
             'status' => 'required|in:available,reserved',
         ]);
 
-        Shift::create($request->all());
+        Shift::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'start' => $request->start,
+            'end' => $request->end,
+            'location' => $request->location,
+            'status' => $request->status,
+            'created_by' => auth()->id(), // Set the uploader
+        ]);
+
         return redirect()->route('shifts.index')->with('success', 'Shift created successfully.');
     }
+
 
     /**
      * Display the specified resource.
@@ -106,17 +116,26 @@ class ShiftController extends Controller
      */
     public function edit(Shift $shift)
     {
-         return view('shifts.edit', compact('shift'));
+        if ($shift->created_by !== auth()->id()) {
+            abort(403, 'You do not have permission to edit this shift.');
+        }
+
+        return view('shifts.edit', compact('shift'));
     }
+
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Shift $shift)
     {
+        if ($shift->created_by !== auth()->id()) {
+            abort(403, 'You do not have permission to update this shift.');
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'start' => 'required|date',
             'end' => 'required|date|after:start',
             'location' => 'required|string|max:255',
@@ -124,8 +143,10 @@ class ShiftController extends Controller
         ]);
 
         $shift->update($request->all());
+
         return redirect()->route('shifts.index')->with('success', 'Shift updated successfully.');
     }
+
 
     public function toggleStatus(Shift $shift){
         if (auth()->user()->role === 'admin') {

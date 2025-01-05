@@ -43,6 +43,7 @@
                         </button>
                     </form>
                 @elseif(auth()->check() && auth()->user()->role === 'user' && $shift->status === 'reserved')
+                    <!-- Success Message -->
                     <p class="mt-4 text-gray-500 font-bold">Shift Reserved</p>
                 @endif
 
