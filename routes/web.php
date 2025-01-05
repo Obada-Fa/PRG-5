@@ -27,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('shifts', ShiftController::class);
 });
 Route::post('/shifts/{shift}/toggle-status', [ShiftController::class, 'toggleStatus'])->name('shifts.toggleStatus');
-
+Route::post('/shifts/{id}/apply', [ShiftController::class, 'apply'])->middleware('auth')->name('shifts.apply');
 
 // Profile routes
 Route::middleware('auth')->group(function () {
