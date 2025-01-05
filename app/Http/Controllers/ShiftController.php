@@ -12,14 +12,12 @@ class ShiftController extends Controller
      */
     public function index(Request $request)
     {
-
         $search = $request->input('search');
         $status = $request->input('status');
 
-
         $query = Shift::query();
 
-        // apply search term in the filter
+        // Apply search term
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'LIKE', '%' . $search . '%')
@@ -33,12 +31,22 @@ class ShiftController extends Controller
             $query->where('status', $status);
         }
 
-
         $shifts = $query->get();
 
+        // Fetch recent applications if admin
+        $applications = [];
+        if (auth()->user()->role === 'admin') {
+            $applications = \DB::table('user_shift')
+                ->join('users', 'user_shift.user_id', '=', 'users.id')
+                ->join('shifts', 'user_shift.shift_id', '=', 'shifts.id')
+                ->select('users.name as user_name', 'shifts.title as shift_title', 'user_shift.status', 'user_shift.created_at')
+                ->orderBy('user_shift.created_at', 'desc')
+                ->get();
+        }
 
-        return view('shifts.index', compact('shifts', 'search', 'status'));
+        return view('shifts.index', compact('shifts', 'search', 'status', 'applications'));
     }
+
 
     public function apply(Request $request, $id)
     {
